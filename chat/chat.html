@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+  <head> 
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <style>
+      :root {
+        --bg: #FCF8F8;
+        --surface: #f6ac2f;
+        --surface-hover: #f0f0f1;
+        --text: #212126;
+        --text-dim: #9090aa;
+        --accent: #FBEFEF;
+        --accent-dim: #3d97d3;
+        --user-bubble: #ece9db;
+        --cat-bubble: #F9DFDF;
+        --border: rgba(0, 0, 0, 2);
+        --radius: 12px;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        height: 100%;
+        font-family: 'Silkscreen', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+      }
+
+      /* ── Title Bar ──────────────────────────────────── */
+      #titlebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 44px;
+        padding: 0 16px;
+        -webkit-app-region: drag;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      #titlebar h1 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .titlebar-btn {
+        -webkit-app-region: no-drag;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 24px;
+        padding: 4px 4px;
+        border-radius: 6px;
+        transition: background 0.15s;
+      }
+      .titlebar-btn:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+      }
+
+      /* ── Messages Area ──────────────────────────────── */
+      #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      #chat-area {
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 44px);
+      }
+
+      .msg {
+        max-width: 88%;
+        padding: 10px 14px;
+        border-radius: var(--radius);
+        font-size: 13.5px;
+        line-height: 1.55;
+        word-wrap: break-word;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .msg.user {
+        align-self: flex-end;
+        background: var(--user-bubble);
+        border-bottom-right-radius: 4px;
+      }
+
+      .msg.assistant {
+        align-self: flex-start;
+        background: var(--cat-bubble);
+        border-bottom-left-radius: 4px;
+      }
+
+      .msg.assistant .sender {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 4px;
+      }
+
+      .msg.error {
+        align-self: center;
+        background: rgba(255, 80, 80, 0.15);
+        color: #ff8888;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      /* Markdown rendered content */
+      .msg.assistant pre {
+        background: rgba(0,0,0,0.3);
+        border-radius: 8px;
+        padding: 10px 12px;
+        overflow-x: auto;
+        margin: 8px 0;
+        font-size: 12px;
+      }
+      .msg.assistant code {
+        font-family: "SF Mono", "Fira Code", monospace;
+        font-size: 12.5px;
+      }
+      .msg.assistant p { margin-bottom: 8px; }
+      .msg.assistant p:last-child { margin-bottom: 0; }
+      .msg.assistant ul, .msg.assistant ol {
+        padding-left: 20px;
+        margin-bottom: 8px;
+      }
+      .msg.assistant h1, .msg.assistant h2, .msg.assistant h3 {
+        margin: 10px 0 4px;
+        color: var(--accent);
+      }
+      .msg.assistant h1 { font-size: 16px; }
+      .msg.assistant h2 { font-size: 14px; }
+      .msg.assistant h3 { font-size: 13px; }
+      .msg.assistant a { color: var(--accent); }
+
+      /* ── Typing indicator ───────────────────────────── */
+      .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 10px 14px;
+        align-self: flex-start;
+      }
+      .typing-indicator span {
+        width: 6px; height: 6px;
+        background: var(--accent-dim);
+        border-radius: 50%;
+        animation: bounce 1.2s infinite;
+      }
+      .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+      .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+      @keyframes bounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-6px); }
+      }
+
+      /* ── Input Area ─────────────────────────────────── */
+      #input-area {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+      }
+
+      #user-input {
+        flex: 1;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        color: var(--text);
+        font-size: 13.5px;
+        font-family: inherit;
+        resize: none;
+        outline: none;
+        max-height: 120px;
+        line-height: 1.4;
+        transition: border-color 0.15s;
+      }
+      #user-input:focus {
+        border-color: var(--accent-dim);
+      }
+      #user-input::placeholder {
+        color: var(--text-dim);
+      }
+
+      #send-btn {
+        background: var(--surface);
+        border: 1;
+        color: var(--bg);
+        width: 36px;
+        height: 36px;
+        border-radius: 100%;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.15s;
+        flex-shrink: 0;
+        outline: none;
+        appearance: none;
+      }
+      #send-btn:disabled { opacity: 0.4; cursor: default; }
+      #send-btn:hover:not(:disabled) { opacity: 0.85; }
+
+      /* ── Welcome ────────────────────────────────────── */
+      #welcome {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        padding: 32px;
+        text-align: center;
+        color: var(--text-dim);
+      }
+      #welcome .cat-face { font-size: 48px; margin-bottom: 12px; }
+      #welcome h2 { color: var(--text); font-size: 16px; margin-bottom: 6px; }
+      #welcome p { font-size: 13px; line-height: 1.6; }
+      #welcome .hints {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 16px;
+        justify-content: center;
+      }
+      #welcome .hint {
+        background: var(--surface-hover);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--text);
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      #welcome .hint:hover { background: var(--accent-dim); }
+
+      /* Scrollbar */
+      #messages::-webkit-scrollbar { width: 5px; }
+      #messages::-webkit-scrollbar-track { background: transparent; }
+      #messages::-webkit-scrollbar-thumb {
+        background: var(--surface-hover);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="titlebar">
+      <h1> Cat Cowork</h1>
+      <button class="titlebar-btn" id="clear-btn" title="Clear chat">⟲</button>
+    </div>
+
+    <div id="chat-area">
+      <div id="messages">
+        <div id="welcome">
+          <div class="cat-face"><img src="cat_pixel.png" style="width: 64px; height: 64px;" /></div>
+          <h2>Meow! I'm your assistant cat.</h2>
+          <p>Ask me anything — I can write code, draft docs, explain things, and more.</p>
+          <div class="hints">
+            <div class="hint" data-msg="Create a README template for me">📄 README template</div>
+            <div class="hint" data-msg="Write a quick Python hello world">🐍 Python starter</div>
+            <div class="hint" data-msg="Explain how async/await works">🧠 Explain concepts</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="input-area">
+        <textarea id="user-input" rows="1" placeholder="Ask the cat anything..."></textarea>
+        <button id="send-btn" title="Send">↑</button>
+      </div>
+    </div>
+
+    <!-- Marked.js for markdown rendering (loaded locally after npm install) -->
+    <script>
+      // Simple inline marked fallback if module isn't found
+      let renderMarkdown;
+      try {
+        const { marked } = require("marked");
+        marked.setOptions({
+          breaks: true,
+          gfm: true,
+        });
+        renderMarkdown = (text) => marked.parse(text);
+      } catch {
+        // Fallback: basic escaping + code blocks
+        renderMarkdown = (text) => {
+          return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/```(\w*)\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>")
+            .replace(/`([^`]+)`/g, "<code>$1</code>")
+            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\n/g, "<br>");
+        };
+      }
+    </script>
+
+    <script>
+      const messages = document.getElementById("messages");
+      const welcome = document.getElementById("welcome");
+      const input = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send-btn");
+      const clearBtn = document.getElementById("clear-btn");
+      let isLoading = false;
+
+      // ── Auto-resize textarea ──
+      input.addEventListener("input", () => {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 120) + "px";
+      });
+
+      // ── Send message ──
+      async function sendMessage(text) {
+        if (!text.trim() || isLoading) return;
+
+        // Hide welcome
+        if (welcome) welcome.style.display = "none";
+
+        // Show user message
+        addMsg(text, "user");
+        input.value = "";
+        input.style.height = "auto";
+
+        // Show typing indicator
+        isLoading = true;
+        sendBtn.disabled = true;
+        const typing = showTyping();
+
+        try {
+          const result = await window.catCowork.sendMessage(text);
+          removeTyping(typing);
+
+          if (result.error) {
+            addMsg(result.error, "error");
+          } else {
+            addMsg(result.reply, "assistant");
+          }
+        } catch (err) {
+          removeTyping(typing);
+          addMsg("Something went wrong: " + err.message, "error");
+        }
+
+        isLoading = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+
+      function addMsg(content, role) {
+        const div = document.createElement("div");
+        div.className = `msg ${role}`;
+
+        if (role === "assistant") {
+          div.innerHTML = `<div class="sender">🐱 Cat</div>${renderMarkdown(content)}`;
+        } else if (role === "error") {
+          div.textContent = "⚠️ " + content;
+        } else {
+          div.textContent = content;
+        }
+
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function showTyping() {
+        const div = document.createElement("div");
+        div.className = "typing-indicator";
+        div.innerHTML = "<span></span><span></span><span></span>";
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return div;
+      }
+
+      function removeTyping(el) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }
+
+      // ── Event Listeners ──
+      sendBtn.addEventListener("click", () => sendMessage(input.value));
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage(input.value);
+        }
+      });
+
+      clearBtn.addEventListener("click", async () => {
+        await window.catCowork.clearHistory();
+        messages.innerHTML = "";
+        if (welcome) {
+          messages.appendChild(welcome);
+          welcome.style.display = "flex";
+        }
+      });
+
+      // ── Hint buttons ──
+      document.querySelectorAll(".hint").forEach((btn) => {
+        btn.addEventListener("click", () => sendMessage(btn.dataset.msg));
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { margin: 0; padding: 0; }
+      html, body {
+        width: 128px;
+        height: 128px;
+        overflow: hidden;
+        background: transparent;
+        user-select: none;
+        -webkit-app-region: no-drag;
+      }
+
+      #cat-container {
+        width: 128px;
+        height: 128px;
+        position: relative;
+        cursor: pointer;
+      }
+
+      /*
+        Spritesheet: cat-sheet-4x.png (1024x1280)
+        Grid: 8 cols x 10 rows, each frame 128x128px
+
+        Row map:
+          0 = idle sitting       (4 frames)
+          1 = idle standing      (4 frames)
+          2 = walk side A        (4 frames)
+          3 = walk side B        (4 frames)
+          4 = run                (8 frames)
+          5 = lie / roll         (8 frames)
+          6 = sleep              (4 frames)
+          7 = jump / play        (6 frames)
+          8 = action poses       (7 frames)
+          9 = walk variant       (8 frames)
+      */
+
+      #cat {
+        width: 128px;
+        height: 128px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background-image: url('./sprites/cat-sheet-4x.png');
+        background-size: 1024px 1280px;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      /* ── IDLE: Row 0, 4 frames ── */
+      .state-idle #cat {
+        animation: anim-idle 1.2s steps(1) infinite;
+      }
+      @keyframes anim-idle {
+        0%    { background-position: 0px    0px; }
+        25%   { background-position: -128px 0px; }
+        50%   { background-position: -256px 0px; }
+        75%   { background-position: -384px 0px; }
+      }
+
+      /* ── WALK RIGHT: Row 4, 8 frames ── */
+      .state-walk-right #cat {
+        animation: anim-walk 0.6s steps(1) infinite;
+      }
+      @keyframes anim-walk {
+        0%      { background-position: 0px    -512px; }
+        12.5%   { background-position: -128px -512px; }
+        25%     { background-position: -256px -512px; }
+        37.5%   { background-position: -384px -512px; }
+        50%     { background-position: -512px -512px; }
+        62.5%   { background-position: -640px -512px; }
+        75%     { background-position: -768px -512px; }
+        87.5%   { background-position: -896px -512px; }
+      }
+
+      /* ── WALK LEFT: Same animation, flipped ── */
+      .state-walk-left #cat {
+        animation: anim-walk 0.6s steps(1) infinite;
+        transform: scaleX(-1);
+      }
+
+      /* ── SIT / SLEEP: Row 6, 4 frames ── */
+      .state-sit #cat {
+        animation: anim-sit 2s steps(1) infinite;
+      }
+      @keyframes anim-sit {
+        0%    { background-position: 0px    -768px; }
+        25%   { background-position: -128px -768px; }
+        50%   { background-position: -256px -768px; }
+        75%   { background-position: -384px -768px; }
+      }
+
+      /* ── Speech bubble ── */
+      #bubble {
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        color: #333;
+        font: bold 11px -apple-system, sans-serif;
+        padding: 3px 8px;
+        border-radius: 8px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      }
+      #cat-container:hover #bubble { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <div id="cat-container" class="state-idle">
+      <div id="bubble">click me! 🐾</div>
+      <div id="cat"></div>
+    </div>
+
+    <script>
+      const container = document.getElementById("cat-container");
+      const bubble = document.getElementById("bubble");
+
+      // ── Click to open chat ──
+      container.addEventListener("click", () => {
+        window.catCowork.petClicked();
+      });
+
+      // ── Drag support ──
+      let isDragging = false;
+      let lastX, lastY;
+
+      container.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        lastX = e.screenX;
+        lastY = e.screenY;
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const dx = e.screenX - lastX;
+        const dy = e.screenY - lastY;
+        lastX = e.screenX;
+        lastY = e.screenY;
+        window.catCowork.petDrag(dx, dy);
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      // ── State changes from main process ──
+      window.catCowork.onPetState((state) => {
+        container.className = "";
+
+        switch (state) {
+          case "walk-right":
+            container.className = "state-walk-right";
+            bubble.textContent = "~nyaa~ 🐾";
+            break;
+          case "walk-left":
+            container.className = "state-walk-left";
+            bubble.textContent = "~nyaa~ 🐾";
+            break;
+          case "sit":
+            container.className = "state-sit";
+            bubble.textContent = "let's chat! 💬";
+            break;
+          case "idle":
+          default:
+            container.className = "state-idle";
+            bubble.textContent = "click me! 🐾";
+            break;
+        }
+      });
+    </script>
+  </body>
+</html>

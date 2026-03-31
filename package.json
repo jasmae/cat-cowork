@@ -1,0 +1,16 @@
+{
+  "name": "cat-cowork",
+  "version": "1.0.0",
+  "description": "A desktop pet cat powered by Claude AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "dependencies": {
+    "marked": "^15.0.0",
+    "dotenv": "^16.4.0"
+  }
+}
