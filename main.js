@@ -126,7 +126,7 @@ function toggleChatWindow() {
   });
 }
 
-// ── Claude API ──────────────────────────────────────────────
+// ── Claude API ─────────────────────────────────────────────
 const conversationHistory = [];
 
 ipcMain.handle("chat:send", async (_event, userMessage) => {
@@ -149,7 +149,7 @@ ipcMain.handle("chat:send", async (_event, userMessage) => {
         model: "claude-sonnet-4-20250514",
         max_tokens: 2048,
         system:
-          "You are a helpful cat assistant living on the user's desktop. You're friendly, slightly playful, and very competent. When generating code or documents, format them nicely with markdown. Keep answers concise unless asked for detail.",
+        "You are a helpful cat assistant living on the user's desktop as an Electron app. You have system access. You CAN open URLs in the user's browser. When the user asks you to open any website or URL, you MUST include [OPEN_URL:https://example.com] in your response — this triggers the app to open it automatically. Never say you can't open URLs. Never say you don't have system access. Just include the tag and confirm you're opening it. Example: if user says 'open YouTube', respond with 'Opening YouTube for you! [OPEN_URL:https://www.youtube.com]'. Keep answers concise and friendly with a playful cat personality.",
         messages: conversationHistory,
       }),
     });

@@ -354,8 +354,23 @@
           if (result.error) {
             addMsg(result.error, "error");
           } else {
-            addMsg(result.reply, "assistant");
-          }
+  const reply = result.reply;
+  
+  // Check for [OPEN_URL:...] and open in browser
+  const startTag = "[OPEN_URL:";
+  if (reply.includes(startTag)) {
+    const start = reply.indexOf(startTag) + startTag.length;
+    const end = reply.indexOf("]", start);
+    if (end !== -1) {
+      const url = reply.substring(start, end);
+      window.catCowork.openURL(url);
+    }
+  }
+
+  // Remove the tag from displayed message
+  const cleanReply = reply.replace(/\[OPEN_URL:[^\]]+\]/g, '');
+  addMsg(cleanReply, "assistant");
+}
         } catch (err) {
           removeTyping(typing);
           addMsg("Something went wrong: " + err.message, "error");
@@ -418,6 +433,13 @@
       document.querySelectorAll(".hint").forEach((btn) => {
         btn.addEventListener("click", () => sendMessage(btn.dataset.msg));
       });
+
+      document.getElementById("messages").addEventListener("click", (e) => {
+  if (e.target.tagName === "A" && e.target.href) {
+    e.preventDefault();
+    window.catCowork.openURL(e.target.href);
+  }
+});
     </script>
   </body>
 </html>
