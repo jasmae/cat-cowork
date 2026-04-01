@@ -87,10 +87,14 @@ function startWalking() {
 // ── Chat Window ─────────────────────────────────────────────
 function toggleChatWindow() {
   if (chatWindow && !chatWindow.isDestroyed()) {
-    chatWindow.close();
-    chatWindow = null;
+  if (chatWindow.isVisible()) {
+    chatWindow.hide();
     petWindow.webContents.send("pet:state", "idle");
-    return;
+  } else {
+    chatWindow.show();
+    petWindow.webContents.send("pet:state", "sit");
+  }
+  return;
   }
 
   const [petX, petY] = petWindow.getPosition();
@@ -184,6 +188,13 @@ ipcMain.on("pet:drag", (_event, deltaX, deltaY) => {
   if (!petWindow) return;
   const [x, y] = petWindow.getPosition();
   petWindow.setPosition(x + deltaX, y + deltaY);
+});
+ipcMain.on("chat:minimize", () => {
+  if (chatWindow) chatWindow.hide();
+});
+
+ipcMain.on("chat:close", () => {
+  if (chatWindow) chatWindow.close();
 });
 
 // ── System Tray ─────────────────────────────────────────────

@@ -32,13 +32,20 @@
       #titlebar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         height: 44px;
         padding: 0 16px;
         -webkit-app-region: drag;
         border-bottom: 1px solid var(--border);
         background: var(--surface);
       }
+
+      #titlebar button {
+         -webkit-app-region: no-drag;
+        position: relative;
+        z-index: 100;
+        pointer-events: auto;
+      }
+
 
       #titlebar h1 {
         font-size: 13px;
@@ -47,6 +54,14 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        flex: 1;
+      }
+
+      #welcome .hint {
+        -webkit-app-region: no-drag;
+        position: relative;
+        z-index: 100;
+        pointer-events: auto;
       }
 
       .titlebar-btn {
@@ -56,13 +71,15 @@
         color: var(--text-dim);
         cursor: pointer;
         font-size: 24px;
-        padding: 4px 4px;
+        padding: 4px 6px;
         border-radius: 6px;
         transition: background 0.15s;
       }
-      .titlebar-btn:hover {
-        background: var(--surface-hover);
-        color: var(--text);
+      .titlebar-actions {
+        display: flex;
+        gap: 0px;
+        align-items: center;
+        -webkit-app-region: no-drag;
       }
 
       /* ── Messages Area ──────────────────────────────── */
@@ -195,6 +212,7 @@
         max-height: 120px;
         line-height: 1.4;
         transition: border-color 0.15s;
+        overflow: hidden;
       }
       #user-input:focus {
         border-color: var(--accent-dim);
@@ -255,6 +273,10 @@
       }
       #welcome .hint:hover { background: var(--accent-dim); }
 
+      #welcome .hint { position: relative;
+        z-index: 10;
+      }
+
       /* Scrollbar */
       #messages::-webkit-scrollbar { width: 5px; }
       #messages::-webkit-scrollbar-track { background: transparent; }
@@ -267,7 +289,8 @@
   <body>
     <div id="titlebar">
       <h1> Cat Cowork</h1>
-      <button class="titlebar-btn" id="clear-btn" title="Clear chat">⟲</button>
+      <button class="titlebar-btn" id="minimize-btn" title="Minimize">−</button>
+       <button class="titlebar-btn" id="close-btn" title="Close & Clear">✕</button>
     </div>
 
     <div id="chat-area">
@@ -277,9 +300,9 @@
           <h2>Meow! I'm your assistant cat.</h2>
           <p>Ask me anything — I can write code, draft docs, explain things, and more.</p>
           <div class="hints">
-            <div class="hint" data-msg="Create a README template for me">📄 README template</div>
-            <div class="hint" data-msg="Write a quick Python hello world">🐍 Python starter</div>
-            <div class="hint" data-msg="Explain how async/await works">🧠 Explain concepts</div>
+            <div class="hint" data-msg="Create a README template for me">Resume Template</div>
+            <div class="hint" data-msg="Write a fact about dinosaurs">Facts about dinosaurs</div>
+            <div class="hint" data-msg="Explain how cosmos are made"> Explain the cosmos</div>
           </div>
         </div>
       </div>
@@ -321,7 +344,6 @@
       const welcome = document.getElementById("welcome");
       const input = document.getElementById("user-input");
       const sendBtn = document.getElementById("send-btn");
-      const clearBtn = document.getElementById("clear-btn");
       let isLoading = false;
 
       // ── Auto-resize textarea ──
@@ -420,26 +442,24 @@
         }
       });
 
-      clearBtn.addEventListener("click", async () => {
-        await window.catCowork.clearHistory();
-        messages.innerHTML = "";
-        if (welcome) {
-          messages.appendChild(welcome);
-          welcome.style.display = "flex";
-        }
-      });
-
       // ── Hint buttons ──
-      document.querySelectorAll(".hint").forEach((btn) => {
-        btn.addEventListener("click", () => sendMessage(btn.dataset.msg));
+      document.getElementById("minimize-btn").addEventListener("click", () => {
+      window.catCowork.minimizeChat();
       });
 
-      document.getElementById("messages").addEventListener("click", (e) => {
-  if (e.target.tagName === "A" && e.target.href) {
-    e.preventDefault();
-    window.catCowork.openURL(e.target.href);
-  }
-});
+      document.getElementById("close-btn").addEventListener("click", async () => {
+      await window.catCowork.clearHistory();
+      messages.innerHTML = "";
+      if (welcome) {
+      messages.appendChild(welcome);
+      welcome.style.display = "flex";
+      }
+      window.catCowork.closeChat();
+      });
+
+      document.querySelectorAll(".hint").forEach((btn) => {
+      btn.addEventListener("click", () => sendMessage(btn.dataset.msg));
+      });
     </script>
   </body>
 </html>

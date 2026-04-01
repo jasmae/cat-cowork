@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld("catCowork", {
   petClicked: () => ipcRenderer.send("pet:clicked"),
   petDrag: (dx, dy) => ipcRenderer.send("pet:drag", dx, dy),
   openURL: (url) => ipcRenderer.send("open:url", url),
+  minimizeChat: () => ipcRenderer.send("chat:minimize"),
+  closeChat: () => ipcRenderer.send("chat:close"),
 
   // Main → Pet
   onPetState: (callback) =>
