@@ -5,8 +5,8 @@
     <style>
       * { margin: 0; padding: 0; }
       html, body {
-        width: 128px;
-        height: 128px;
+        width: 200px;
+        height: 180px;
         overflow: hidden;
         background: transparent;
         user-select: none;
@@ -14,8 +14,8 @@
       }
 
       #cat-container {
-        width: 128px;
-        height: 128px;
+        width: 200px;
+        height: 180px;
         position: relative;
         cursor: pointer;
       }
@@ -42,7 +42,7 @@
         height: 128px;
         position: absolute;
         bottom: 0;
-        left: 0;
+        left: 36;
         background-image: url('./sprites/cat-sheet-4x.png');
         background-size: 1024px 1280px;
         background-repeat: no-repeat;
@@ -96,7 +96,7 @@
       /* ── Speech bubble ── */
       #bubble {
         position: absolute;
-        top: -4px;
+        top: 100px;
         left: 50%;
         transform: translateX(-50%);
         background: white;
@@ -110,6 +110,15 @@
         pointer-events: none;
         box-shadow: 0 1px 4px rgba(0,0,0,0.15);
       }
+      #bubble.show {
+        opacity: 1;
+      }
+
+      #bubble.fade-out {
+        opacity: 0;
+        transition: opacity 1s;
+      }
+
       #cat-container:hover #bubble { opacity: 1; }
     </style>
   </head>
@@ -175,6 +184,38 @@
             break;
         }
       });
+
+          const thoughts = [
+            "i want fish... 🐟",
+            "meow~ 💭",
+            "time for a nap...",
+            "what if i pushed something off a table?",
+            "keyboard looks warm...",
+            "doing important cat stuff",
+            "i see a bug!",
+            "*purring intensifies*",
+            "have you taken a break?",
+            "pet me maybe? 🐾",
+            "thinking about boxes... 📦",
+            "you're doing great today!",
+            "stretch time",
+            "hmm suspicious dot on screen...",
+            "i deserve treats",
+            "what if I take over this computer?",
+        ];
+
+setInterval(() => {
+  if (Math.random() < 0.3) {
+    bubble.textContent = thoughts[Math.floor(Math.random() * thoughts.length)];
+    bubble.classList.add("show");
+    bubble.classList.remove("fade-out");
+
+    setTimeout(() => {
+      bubble.classList.add("fade-out");
+      bubble.classList.remove("show");
+    }, 3000);
+  }
+}, 5000);
     </script>
   </body>
 </html>

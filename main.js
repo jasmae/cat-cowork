@@ -11,10 +11,10 @@ function createPetWindow() {
   const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
 
   petWindow = new BrowserWindow({
-    width: 128,
-    height: 128,
+    width: 200,
+    height: 180,
     x: Math.floor(screenW / 2),
-    y: screenH - 90,
+    y: screenH - 150,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -44,7 +44,7 @@ let isIdle = false;
 function startWalking() {
   const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
   const speed = 2;
-  const groundY = screenH - 90;
+  const groundY = screenH - 150;
 
   walkInterval = setInterval(() => {
     if (!petWindow || petWindow.isDestroyed()) return;
