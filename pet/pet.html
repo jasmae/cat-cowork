@@ -137,6 +137,14 @@
         window.catCowork.petClicked();
       });
 
+      container.addEventListener("mouseenter", () => {
+        window.catCowork.petHover(true);
+      });
+
+container.addEventListener("mouseleave", () => {
+  window.catCowork.petHover(false);
+});
+
       // ── Drag support ──
       let isDragging = false;
       let lastX, lastY;

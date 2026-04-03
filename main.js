@@ -36,6 +36,8 @@ function createPetWindow() {
 }
 
 // ── Cat Movement ────────────────────────────────────────────
+let chatOpen = false;
+let hoverPaused = false;
 let walkInterval = null;
 let direction = 1; // 1 = right, -1 = left
 let idleTicks = 0;
@@ -86,15 +88,20 @@ function startWalking() {
 
 // ── Chat Window ─────────────────────────────────────────────
 function toggleChatWindow() {
-  if (chatWindow && !chatWindow.isDestroyed()) {
-  if (chatWindow.isVisible()) {
+    if (chatWindow && !chatWindow.isDestroyed()) {
+    if (chatWindow.isVisible()) {
     chatWindow.hide();
+    chatOpen = false;
     petWindow.webContents.send("pet:state", "idle");
+    if (!hoverPaused) startWalking();
   } else {
     chatWindow.show();
+    chatOpen = true;
     petWindow.webContents.send("pet:state", "sit");
+    clearInterval(walkInterval);
+    walkInterval = null;
   }
-  return;
+    return;
   }
 
   const [petX, petY] = petWindow.getPosition();
@@ -122,11 +129,17 @@ function toggleChatWindow() {
   // Cat sits down when chat is open
   petWindow.webContents.send("pet:state", "sit");
 
-  chatWindow.on("closed", () => {
-    chatWindow = null;
-    if (petWindow && !petWindow.isDestroyed()) {
-      petWindow.webContents.send("pet:state", "idle");
-    }
+  chatOpen = true;
+  clearInterval(walkInterval);
+  walkInterval = null;
+
+ chatWindow.on("closed", () => {
+  chatWindow = null;
+  chatOpen = false;
+  if (petWindow && !petWindow.isDestroyed()) {
+    petWindow.webContents.send("pet:state", "idle");
+    startWalking();
+  }
   });
 }
 
@@ -195,6 +208,19 @@ ipcMain.on("chat:minimize", () => {
 
 ipcMain.on("chat:close", () => {
   if (chatWindow) chatWindow.close();
+});
+
+ipcMain.on("pet:hover", (_event, hovering) => {
+  if (chatOpen) return;
+  if (hovering) {
+    hoverPaused = true;
+    clearInterval(walkInterval);
+    walkInterval = null;
+    petWindow.webContents.send("pet:state", "sit");
+  } else {
+    hoverPaused = false;
+    startWalking();
+  }
 });
 
 // ── System Tray ─────────────────────────────────────────────

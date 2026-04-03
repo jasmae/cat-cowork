@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("catCowork", {
   openURL: (url) => ipcRenderer.send("open:url", url),
   minimizeChat: () => ipcRenderer.send("chat:minimize"),
   closeChat: () => ipcRenderer.send("chat:close"),
+  petHover: (hovering) => ipcRenderer.send("pet:hover", hovering),
 
   // Main → Pet
   onPetState: (callback) =>
